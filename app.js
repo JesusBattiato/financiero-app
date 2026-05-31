@@ -398,6 +398,7 @@ function renderTasks() {
       updateProgressBars();
       renderTable();
       renderDecenalTable();
+      triggerAutoSave();
     };
 
     container.appendChild(item);
@@ -667,6 +668,7 @@ function saveEditorValues() {
   renderTasks();
   updateProgressBars();
   renderDecenalTable();
+  triggerAutoSave();
   
   // Micro-feedback animation on button click
   const btn = document.getElementById('btn-save-params');
@@ -691,6 +693,57 @@ window.onload = () => {
   document.getElementById('edit-month').addEventListener('change', loadEditorValues);
   document.getElementById('btn-save-params').addEventListener('click', saveEditorValues);
   
+  // Cloud Sync UI listeners
+  document.getElementById('btn-sync-settings').addEventListener('click', () => {
+    const panel = document.getElementById('sync-settings-panel');
+    panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+  });
+
+  document.getElementById('btn-save-settings').addEventListener('click', () => {
+    initGoogleDriveSync();
+    document.getElementById('sync-settings-panel').style.display = 'none';
+  });
+
+  document.getElementById('btn-sync-connect').addEventListener('click', handleAuthClick);
+  document.getElementById('btn-sync-save').addEventListener('click', uploadDriveContent);
+  document.getElementById('btn-sync-load').addEventListener('click', downloadDriveContent);
+
+  // Conflict Modal listeners
+  document.getElementById('btn-conflict-download').addEventListener('click', async () => {
+    await downloadDriveContent();
+    hideConflictModal();
+  });
+
+  document.getElementById('btn-conflict-upload').addEventListener('click', async () => {
+    await uploadDriveContent();
+    hideConflictModal();
+  });
+
+  // Load Client ID from localStorage if exists
+  const savedClientId = localStorage.getItem('sync_client_id');
+  if (savedClientId) {
+    document.getElementById('sync-client-id').value = savedClientId;
+  }
+
+  // Check if we have an access token in sessionStorage (for page refreshes)
+  const savedToken = sessionStorage.getItem('gdrive_access_token');
+  if (savedToken) {
+    googleAccessToken = savedToken;
+    document.getElementById('btn-sync-connect').textContent = 'Desconectar Cuenta';
+    document.getElementById('btn-sync-save').style.display = 'inline-block';
+    document.getElementById('btn-sync-load').style.display = 'inline-block';
+    showSyncStatus('Conectado ✓', 'connected');
+    
+    // Verify file status
+    setTimeout(() => {
+      if (typeof google !== 'undefined') {
+        searchDriveFile();
+      } else {
+        showSyncStatus('Google SDK no cargado', 'error');
+      }
+    }, 1000);
+  }
+  
   // Render views
   renderTabs();
   renderTasks();
@@ -698,3 +751,255 @@ window.onload = () => {
   renderTable();
   renderDecenalTable();
 };
+
+// ==========================================
+// GOOGLE DRIVE SYNC SYSTEM
+// ==========================================
+
+let googleTokenClient = null;
+let googleAccessToken = null;
+let googleFileId = null;
+
+// Initialize Google OAuth Token Client
+function initGoogleDriveSync() {
+  const clientId = document.getElementById('sync-client-id').value.trim();
+  if (!clientId) {
+    showSyncStatus('Falta Client ID', 'error');
+    return;
+  }
+
+  localStorage.setItem('sync_client_id', clientId);
+
+  try {
+    googleTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      callback: async (response) => {
+        if (response.error !== undefined) {
+          showSyncStatus('Error: ' + response.error, 'error');
+          console.error(response);
+          return;
+        }
+        googleAccessToken = response.access_token;
+        sessionStorage.setItem('gdrive_access_token', googleAccessToken);
+        showSyncStatus('Conectando...', 'syncing');
+        
+        // Load buttons
+        document.getElementById('btn-sync-connect').textContent = 'Desconectar Cuenta';
+        document.getElementById('btn-sync-save').style.display = 'inline-block';
+        document.getElementById('btn-sync-load').style.display = 'inline-block';
+        
+        await searchDriveFile();
+      },
+    });
+  } catch (err) {
+    showSyncStatus('Error inicialización OAuth', 'error');
+    console.error(err);
+  }
+}
+
+// Show connection status
+function showSyncStatus(text, statusClass) {
+  const statusEl = document.getElementById('sync-status-text');
+  statusEl.className = 'sync-status-text ' + statusClass;
+  statusEl.textContent = `Google Drive: ${text}`;
+}
+
+// Request Access Token
+function handleAuthClick() {
+  if (googleAccessToken) {
+    // Disconnect
+    googleAccessToken = null;
+    googleFileId = null;
+    sessionStorage.removeItem('gdrive_access_token');
+    showSyncStatus('Desconectado', '');
+    document.getElementById('btn-sync-connect').textContent = 'Conectar Cuenta';
+    document.getElementById('btn-sync-save').style.display = 'none';
+    document.getElementById('btn-sync-load').style.display = 'none';
+  } else {
+    if (!googleTokenClient) {
+      initGoogleDriveSync();
+    }
+    if (googleTokenClient) {
+      googleTokenClient.requestAccessToken({ prompt: 'consent' });
+    }
+  }
+}
+
+// Helper for standard authenticated fetch requests to Google APIs
+async function fetchGoogleApi(url, options = {}) {
+  if (!googleAccessToken) {
+    showSyncStatus('Sesión Expirada (Reconectar)', 'error');
+    return null;
+  }
+  
+  if (!options.headers) options.headers = {};
+  options.headers['Authorization'] = `Bearer ${googleAccessToken}`;
+  
+  try {
+    const response = await fetch(url, options);
+    if (response.status === 401) {
+      // Access Token expired, disconnect session
+      googleAccessToken = null;
+      sessionStorage.removeItem('gdrive_access_token');
+      showSyncStatus('Sesión Expirada (Reconectar)', 'error');
+      document.getElementById('btn-sync-connect').textContent = 'Conectar Cuenta';
+      document.getElementById('btn-sync-save').style.display = 'none';
+      document.getElementById('btn-sync-load').style.display = 'none';
+      return null;
+    }
+    return response;
+  } catch (err) {
+    console.error('API Fetch Error:', err);
+    return null;
+  }
+}
+
+// Search for the plan_financiero_datos.json file in Drive
+async function searchDriveFile() {
+  showSyncStatus('Buscando archivo...', 'syncing');
+  const response = await fetchGoogleApi(
+    `https://www.googleapis.com/drive/v3/files?q=name='plan_financiero_datos.json' and trashed=false&fields=files(id,name)`
+  );
+  
+  if (!response) return;
+  const data = await response.json();
+  
+  if (data.files && data.files.length > 0) {
+    googleFileId = data.files[0].id;
+    // File exists, check content and resolve conflicts
+    showSyncStatus('Conectado ✓', 'connected');
+    showConflictModal();
+  } else {
+    // File doesn't exist, create it with local data
+    showSyncStatus('Creando archivo...', 'syncing');
+    await createDriveFile();
+  }
+}
+
+// Generate the JSON content of all local storage state
+function serializeLocalData() {
+  const data = {
+    overrides: {},
+    checkedTasks: checkedTasks,
+    customTasks: {},
+    lastUpdated: new Date().toISOString()
+  };
+  
+  // Extract overrides and custom tasks from localStorage
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('override_')) {
+      data.overrides[key] = JSON.parse(localStorage.getItem(key));
+    } else if (key.startsWith('tasks_')) {
+      data.customTasks[key] = JSON.parse(localStorage.getItem(key));
+    }
+  }
+  return JSON.stringify(data, null, 2);
+}
+
+// Create file in Drive
+async function createDriveFile() {
+  showSyncStatus('Guardando en Drive...', 'syncing');
+  
+  const metadataResponse = await fetchGoogleApi('https://www.googleapis.com/drive/v3/files', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: 'plan_financiero_datos.json',
+      mimeType: 'application/json'
+    })
+  });
+  
+  if (!metadataResponse) return;
+  const fileMeta = await metadataResponse.json();
+  googleFileId = fileMeta.id;
+  
+  await uploadDriveContent();
+}
+
+// Upload file content (media patch)
+async function uploadDriveContent() {
+  if (!googleFileId) return;
+  showSyncStatus('Sincronizando...', 'syncing');
+  
+  const content = serializeLocalData();
+  const response = await fetchGoogleApi(
+    `https://www.googleapis.com/upload/drive/v3/files/${googleFileId}?uploadType=media`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: content
+    }
+  );
+  
+  if (response && response.ok) {
+    showSyncStatus('Sincronizado ✓', 'connected');
+  } else {
+    showSyncStatus('Error de guardado', 'error');
+  }
+}
+
+// Download file content from Drive and replace localStorage data
+async function downloadDriveContent() {
+  if (!googleFileId) return;
+  showSyncStatus('Descargando...', 'syncing');
+  
+  const response = await fetchGoogleApi(
+    `https://www.googleapis.com/drive/v3/files/${googleFileId}?alt=media`
+  );
+  
+  if (!response) return;
+  const data = await response.json();
+  
+  // Apply data to localStorage
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('override_') || key.startsWith('tasks_')) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+  
+  if (data.overrides) {
+    Object.keys(data.overrides).forEach(key => {
+      localStorage.setItem(key, JSON.stringify(data.overrides[key]));
+    });
+  }
+  
+  if (data.customTasks) {
+    Object.keys(data.customTasks).forEach(key => {
+      localStorage.setItem(key, JSON.stringify(data.customTasks[key]));
+    });
+  }
+  
+  checkedTasks = data.checkedTasks || {};
+  saveState();
+  
+  // Reload App UI
+  renderTabs();
+  renderTasks();
+  updateProgressBars();
+  renderTable();
+  renderDecenalTable();
+  loadEditorValues();
+  
+  showSyncStatus('Sincronizado ✓', 'connected');
+}
+
+// Conflict Modal display functions
+function showConflictModal() {
+  document.getElementById('drive-conflict-modal').style.display = 'flex';
+}
+
+function hideConflictModal() {
+  document.getElementById('drive-conflict-modal').style.display = 'none';
+}
+
+// Trigger auto-save to Google Drive in the background (if connected)
+function triggerAutoSave() {
+  if (googleAccessToken && googleFileId) {
+    uploadDriveContent();
+  }
+}

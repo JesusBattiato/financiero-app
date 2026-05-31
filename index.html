@@ -8,10 +8,30 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=2.0.0">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <div class="glow-bg"></div>
   <div class="container">
+    <!-- WIDGET DE SINCRONIZACIÓN EN LA NUBE -->
+    <div class="sync-status-bar">
+      <div class="sync-info">
+        <span class="sync-icon">☁️</span>
+        <span id="sync-status-text" class="sync-status-text">Google Drive: Desconectado</span>
+      </div>
+      <div class="sync-actions">
+        <button id="btn-sync-connect" class="btn-sync">Conectar Cuenta</button>
+        <button id="btn-sync-save" class="btn-sync secondary" style="display: none;">Subir a Drive</button>
+        <button id="btn-sync-load" class="btn-sync secondary" style="display: none;">Cargar de Drive</button>
+        <button id="btn-sync-settings" class="btn-icon">⚙️</button>
+      </div>
+      <div id="sync-settings-panel" class="sync-settings-panel" style="display: none;">
+        <label for="sync-client-id">Google Client ID:</label>
+        <input type="text" id="sync-client-id" value="158839285523-u9faht6ha24i6ptb0e5tdrup1g78s14s.apps.googleusercontent.com">
+        <button id="btn-save-settings" class="btn-sync">Guardar Client ID</button>
+      </div>
+    </div>
+
     <header class="app-header">
       <div class="header-logo">
         <span class="logo-symbol">💳</span>
@@ -269,6 +289,18 @@
     <footer class="app-footer">
       <p>Diseñado para Jesus Juan Jose Battiato &bull; Actualizado en tiempo real usando LocalStorage.</p>
     </footer>
+  </div>
+
+  <!-- MODAL DE CONFLICTO DE SINCRONIZACIÓN -->
+  <div id="drive-conflict-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <h3>🔄 Conflicto de Sincronización</h3>
+      <p>Se encontró una copia de seguridad en tu Google Drive. ¿Qué deseas hacer?</p>
+      <div class="modal-actions">
+        <button id="btn-conflict-download" class="btn-sync">Descargar de la Nube</button>
+        <button id="btn-conflict-upload" class="btn-sync secondary">Subir datos Locales</button>
+      </div>
+    </div>
   </div>
 
   <script src="app.js?v=2.0.0"></script>
