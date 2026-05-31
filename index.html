@@ -87,42 +87,71 @@
         </div>
       </section>
 
-      <!-- SIMULADOR DE JUBILACIÓN -->
-      <section class="card retirement-card">
-        <h2>Simulador de Jubilación Anticipada</h2>
-        <div class="retirement-inputs">
-          <div class="input-group">
-            <label for="input-age">Edad actual</label>
-            <input type="number" id="input-age" value="34">
+      <!-- EDITOR DE PARÁMETROS MENSUALES -->
+      <section class="card parameter-editor-card">
+        <h2>🛠️ Editor de Parámetros de Mes</h2>
+        <p class="section-desc">Modifica los ingresos, gastos o cuotas para reflejar la inflación o cambios en tu flujo real.</p>
+        
+        <div class="editor-grid">
+          <div class="editor-group" style="grid-column: span 2;">
+            <label for="edit-month">Seleccionar Mes a Editar</label>
+            <select id="edit-month">
+              <!-- Generated dynamically by JS -->
+            </select>
           </div>
-          <div class="input-group">
-            <label for="input-ret-age">Edad de retiro</label>
-            <input type="number" id="input-ret-age" value="55">
+          
+          <div class="editor-group">
+            <label for="edit-income">Sueldo + SAC ($)</label>
+            <input type="number" id="edit-income">
           </div>
-          <div class="input-group">
-            <label for="input-coverage">Años a cubrir</label>
-            <input type="number" id="input-coverage" value="30">
+          
+          <div class="editor-group">
+            <label for="edit-loan">Préstamo ($)</label>
+            <input type="number" id="edit-loan">
           </div>
-          <div class="input-group">
-            <label for="input-income">Ingreso mensual objetivo ($)</label>
-            <input type="number" id="input-income" value="2500000">
+          
+          <div class="editor-group">
+            <label for="edit-card">Tarjeta de Crédito ($)</label>
+            <input type="number" id="edit-card">
           </div>
-          <div class="input-group">
-            <label for="input-return">Retorno real anual (%)</label>
-            <input type="number" id="input-return" value="4" step="0.1">
+          
+          <div class="editor-group">
+            <label for="edit-exp-nanny">Niñera ($)</label>
+            <input type="number" id="edit-exp-nanny">
+          </div>
+          
+          <div class="editor-group">
+            <label for="edit-exp-home">Hogar ($)</label>
+            <input type="number" id="edit-exp-home">
+          </div>
+          
+          <div class="editor-group">
+            <label for="edit-exp-kennedy">Univ. Kennedy ($)</label>
+            <input type="number" id="edit-exp-kennedy">
+          </div>
+          
+          <div class="editor-group">
+            <label for="edit-exp-mortgage">Hipotecario ($)</label>
+            <input type="number" id="edit-exp-mortgage">
+          </div>
+          
+          <div class="editor-group">
+            <label for="edit-exp-life">Vida/Discrecional ($)</label>
+            <input type="number" id="edit-exp-life">
+          </div>
+
+          <div class="editor-group">
+            <label for="edit-saving-vacation">Ahorro Vacac. ($)</label>
+            <input type="number" id="edit-saving-vacation">
+          </div>
+
+          <div class="editor-group">
+            <label for="edit-saving-house">Casa Efectivo ($)</label>
+            <input type="number" id="edit-saving-house">
           </div>
         </div>
 
-        <div class="retirement-results">
-          <div class="result-box">
-            <span class="result-label">Capital total requerido:</span>
-            <span class="result-val highlight" id="ret-capital">$0</span>
-          </div>
-          <div class="result-box">
-            <span class="result-label">Ahorro mensual necesario:</span>
-            <span class="result-val highlight-green" id="ret-monthly">$0</span>
-          </div>
-        </div>
+        <button id="btn-save-params" class="btn-update">Guardar & Actualizar Proyección</button>
       </section>
 
       <!-- CHECKLIST INTERACTIVO POR MESES -->
@@ -163,6 +192,76 @@
               <!-- Rows generated dynamically by JS -->
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- PLAN DECENAL Y HOJA DE RUTA A LARGO PLAZO -->
+      <section class="card table-card full-width">
+        <h2>📅 Hoja de Ruta a Largo Plazo (Plan Decenal: 2026 - 2036)</h2>
+        <p class="section-desc">Evolución proyectada de tus fondos de inversión y metas patrimoniales a 10 años, asumiendo un 4% de retorno real compuesto anual y tus tasas de ahorro de largo plazo.</p>
+        
+        <div class="grid-layout" style="margin-top: 1rem; border: none; padding: 0; background: transparent; box-shadow: none;">
+          <div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.75rem; color: #60a5fa;">Hitos Clave del Plan</h3>
+            <div class="timeline-container">
+              <div class="timeline-item completed">
+                <div class="timeline-year">Julio 2026</div>
+                <div class="timeline-title">Inicio Primera Etapa Casa Salta</div>
+                <div class="timeline-desc">Construcción de cielo raso (Etapa 1 mano de obra) y primer acopio en efectivo.</div>
+              </div>
+              <div class="timeline-item completed">
+                <div class="timeline-year">Enero 2027</div>
+                <div class="timeline-title">Fin del Préstamo Santander & Sanitaria</div>
+                <div class="timeline-desc">Pago de la cuota 12/12 del préstamo y abono de la instalación sanitaria (Etapa 2 mano de obra).</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-year">Marzo 2027</div>
+                <div class="timeline-title">Inicio de Ahorro e Inversiones a Largo Plazo</div>
+                <div class="timeline-desc">Lanzamiento del plan patrimonial. Se reservan $10M para Emergencia y $1.93M como semilla para Casa Fase 2.</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-year">Diciembre 2028</div>
+                <div class="timeline-title">Fondo de Emergencia Completado (100%)</div>
+                <div class="timeline-desc">Finalización del ahorro de reserva total de $23.25M (equivalente a 6 meses de gastos).</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-year">Febrero 2033 (6 años)</div>
+                <div class="timeline-title">Casa en Salta Finalizada (Fase 2 - $150M)</div>
+                <div class="timeline-desc">Construcción total del resto de la casa completada con aportes regulares ($1.5M/mes + SAC).</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-year">Febrero 2040 (14 años)</div>
+                <div class="timeline-title">Fondo Nahuel Universidad al 100%</div>
+                <div class="timeline-desc">Nahuel inicia sus estudios universitarios con su fondo educativo completamente fondeado.</div>
+              </div>
+              <div class="timeline-item">
+                <div class="timeline-year">Año 2047 (Edad: 55)</div>
+                <div class="timeline-title">Jubilación Anticipada</div>
+                <div class="timeline-desc">Retiro definitivo con un fondo acumulado de $518.76M (a valor de compra presente) asegurando 30 años sin trabajar.</div>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.75rem; color: #34d399;">Proyección de Inversiones Acumuladas</h3>
+            <div class="table-container">
+              <table class="financial-table" style="font-size: 0.82rem;">
+                <thead>
+                  <tr>
+                    <th>Año</th>
+                    <th>Emergencia</th>
+                    <th>Construcción</th>
+                    <th>Universidad</th>
+                    <th>Retiro</th>
+                    <th>Total Acumulado</th>
+                  </tr>
+                </thead>
+                <tbody id="decenal-table-body">
+                  <!-- Generated dynamically by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
     </div>
