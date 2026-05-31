@@ -2,14 +2,14 @@
 const startBalance = 0; // Starts at 0, May salary is the Income of June!
 
 const monthsData = [
-  { id: 'jun-26', name: 'Junio 2026', income: 8250000, expenseRegular: 4274566, loan: 3219566.60, vacation: 0, houseManoObra: 0, houseMaterial: 660000 }, // in June we have the 660k CC payment
-  { id: 'jul-26', name: 'Julio 2026', income: 12375000, expenseRegular: 4674566, loan: 3219566.60, vacation: 285000, houseManoObra: 1000000, houseMaterial: 667000 }, // materials adelanto 500k + cuota 1/6 167k + CC regular
-  { id: 'ago-26', name: 'Agosto 2026', income: 8250000, expenseRegular: 4274566, loan: 3219566.60, vacation: 285000, houseManoObra: 0, houseMaterial: 167000 },
-  { id: 'sep-26', name: 'Sep. 2026', income: 8250000, expenseRegular: 4274566, loan: 3219566.60, vacation: 285000, houseManoObra: 0, houseMaterial: 167000 },
-  { id: 'oct-26', name: 'Oct. 2026', income: 8250000, expenseRegular: 4274566, loan: 3219566.60, vacation: 285000, houseManoObra: 0, houseMaterial: 167000 },
-  { id: 'nov-26', name: 'Nov. 2026', income: 8250000, expenseRegular: 4274566, loan: 3219566.60, vacation: 285000, houseManoObra: 0, houseMaterial: 167000 },
-  { id: 'dic-26', name: 'Dic. 2026', income: 8250000, expenseRegular: 4274566, loan: 3219566.60, vacation: 285000, houseManoObra: 0, houseMaterial: 167000 },
-  { id: 'ene-27', name: 'Enero 2027', income: 12375000, expenseRegular: 4674566, loan: 3219566.60, vacation: 285000, houseManoObra: 2000000, houseMaterial: 0 }
+  { id: 'jun-26', name: 'Junio 2026', income: 8250000, expenseRegular: 3574566, loan: 3219566.60, vacation: 0, houseManoObra: 0, houseMaterial: 660000 }, 
+  { id: 'jul-26', name: 'Julio 2026', income: 12375000, expenseRegular: 3974566, loan: 3219566.60, vacation: 285000, houseManoObra: 1000000, houseMaterial: 667000 }, 
+  { id: 'ago-26', name: 'Agosto 2026', income: 8250000, expenseRegular: 3574566, loan: 3219566.60, vacation: 285000, houseManoObra: 0, houseMaterial: 167000 },
+  { id: 'sep-26', name: 'Sep. 2026', income: 8250000, expenseRegular: 3574566, loan: 3219566.60, vacation: 285000, houseManoObra: 0, houseMaterial: 167000 },
+  { id: 'oct-26', name: 'Oct. 2026', income: 8250000, expenseRegular: 3574566, loan: 3219566.60, vacation: 285000, houseManoObra: 0, houseMaterial: 167000 },
+  { id: 'nov-26', name: 'Nov. 2026', income: 8250000, expenseRegular: 3574566, loan: 3219566.60, vacation: 285000, houseManoObra: 0, houseMaterial: 167000 },
+  { id: 'dic-26', name: 'Dic. 2026', income: 8250000, expenseRegular: 3574566, loan: 3219566.60, vacation: 285000, houseManoObra: 0, houseMaterial: 167000 },
+  { id: 'ene-27', name: 'Enero 2027', income: 12375000, expenseRegular: 3974566, loan: 3219566.60, vacation: 285000, houseManoObra: 2000000, houseMaterial: 0 }
 ];
 
 const tasksList = {
@@ -112,10 +112,10 @@ function updateProgressBars() {
   if (checkedTasks['jun-sac']) emergencyFundSaved += 3725000;
   if (checkedTasks['dic-sac']) emergencyFundSaved += 2325000;
   
-  // Total Emergency Fund target is 24.45M
-  const emergencyPct = Math.min(100, (emergencyFundSaved / 24450000) * 100);
+  // Total Emergency Fund target is 23.25M
+  const emergencyPct = Math.min(100, (emergencyFundSaved / 23250000) * 100);
   document.getElementById('bar-emergency').style.width = emergencyPct + '%';
-  document.getElementById('val-emergency').textContent = `${formatCurrency(emergencyFundSaved)} / $24.450.000`;
+  document.getElementById('val-emergency').textContent = `${formatCurrency(emergencyFundSaved)} / $23.250.000`;
 
   // 4. Education Fund
   const educationPct = 0;
