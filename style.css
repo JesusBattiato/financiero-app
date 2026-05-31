@@ -441,9 +441,18 @@ body {
 /* Parameter Editor & 10-Year Timeline */
 .editor-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
   margin-bottom: 1.25rem;
+}
+
+@media (max-width: 600px) {
+  .editor-grid {
+    grid-template-columns: 1fr;
+  }
+  .editor-group[style*="grid-column"] {
+    grid-column: span 1 !important;
+  }
 }
 
 .editor-group {
@@ -467,6 +476,11 @@ body {
   font-size: 0.9rem;
   width: 100%;
   transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.editor-group select option {
+  background-color: #0f172a;
+  color: #f8fafc;
 }
 
 .editor-group select:focus, .editor-group input:focus {

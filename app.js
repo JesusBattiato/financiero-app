@@ -23,9 +23,9 @@ function getRolling12Months() {
   let year = now.getFullYear();
   let month = now.getMonth(); // 0-11
   
-  // Calculate current financial month cycle (month + 1)
-  let startMonth = (month + 1) % 12;
-  let startYear = month === 11 ? year + 1 : year;
+  // Start from the current month
+  let startMonth = month;
+  let startYear = year;
 
   // Clamp starting month to June 2026 (the start of the financial plan) if calendar is earlier
   if (startYear < 2026 || (startYear === 2026 && startMonth < 5)) {
@@ -487,60 +487,76 @@ function renderDecenalTable() {
   const tbody = document.getElementById('decenal-table-body');
   tbody.innerHTML = '';
   
-  // Starting values in March 2027 (in pesos, present value)
-  let emergency = 10000000;
-  let construction = 1933203;
-  let university = 0;
-  let retirement = 0;
-  
-  // Custom seeds overrides based on checklist completion
-  if (checkedTasks['jun-sac']) emergency += 3725000;
-  if (checkedTasks['dic-sac']) emergency += 2325000;
-  if (!checkedTasks['feb-viaje']) {
-    // If travel not done, seeds haven't initialized
-    emergency = (checkedTasks['jun-sac'] ? 3725000 : 0) + (checkedTasks['dic-sac'] ? 2325000 : 0);
-    construction = 0;
+  // Current date for determining if a task is in the future
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+
+  // Helper to check if a task is completed or projected (in the future)
+  function isTaskActive(taskId, taskMonth, taskYear) {
+    if (taskYear > currentYear || (taskYear === currentYear && taskMonth >= currentMonth)) {
+      return true;
+    }
+    return !!checkedTasks[taskId];
   }
 
-  const realReturnMonthly = Math.pow(1 + 0.04, 1 / 12) - 1;
-  const yearlyRecords = {};
+  // Calculate 2026 starting values
+  const saveJun26 = isTaskActive('jun-sac', 5, 2026) ? 3725000 : 0;
+  const saveDic26 = isTaskActive('dic-sac', 11, 2026) ? 2325000 : 0;
+  
+  let emergency = saveJun26 + saveDic26;
+  let construction = isTaskActive('jul-mat-ade', 6, 2026) ? 500000 : 0;
+  let university = 0;
+  let retirement = 0;
 
-  // Initialize 2026 record
+  const yearlyRecords = {};
   yearlyRecords[2026] = {
-    emergency: (checkedTasks['jun-sac'] ? 3725000 : 0) + (checkedTasks['dic-sac'] ? 2325000 : 0),
-    construction: checkedTasks['jul-mat-ade'] ? 500000 : 0,
-    university: 0,
-    retirement: 0
+    emergency,
+    construction,
+    university,
+    retirement
   };
 
-  // Run month-by-month simulation from March 2027 to December 2036
-  let simMonth = 2; // March (0-indexed)
+  const realReturnMonthly = Math.pow(1 + 0.04, 1 / 12) - 1;
+
+  // Run month-by-month simulation from Jan 2027 to December 2036
+  let simMonth = 0; // January
   let simYear = 2027;
   
   while (simYear <= 2036) {
-    if (checkedTasks['feb-viaje']) {
-      // 1. Emergency Fund (limit to 23.25M)
-      if (emergency < 23250000) {
-        emergency += 60000; // slow accumulation
+    // In March 2027, initialize the seeds if the transition/travel task is completed or projected
+    if (simYear === 2027 && simMonth === 2) {
+      if (isTaskActive('feb-viaje', 1, 2027)) {
+        emergency += 10000000;
+        construction += 1933203;
       }
-      
-      // 2. Construction Fund (limit to 150M)
-      if (construction < 150000000) {
-        construction += 1500000;
-        if (simMonth === 0 || simMonth === 6) { // January / July SAC
-          construction += 2500000;
+    }
+
+    if (simYear > 2027 || (simYear === 2027 && simMonth >= 2)) {
+      if (isTaskActive('feb-viaje', 1, 2027)) {
+        // 1. Emergency Fund (limit to 23.25M)
+        if (emergency < 23250000) {
+          emergency += 60000;
         }
+        
+        // 2. Construction Fund (limit to 150M)
+        if (construction < 150000000) {
+          construction += 1500000;
+          if (simMonth === 0 || simMonth === 6) { // January / July SAC
+            construction += 2500000;
+          }
+        }
+        construction = construction * (1 + realReturnMonthly);
+        if (construction > 150000000) construction = 150000000;
+
+        // 3. University Fund
+        university += 74000;
+        university = university * (1 + realReturnMonthly);
+
+        // 4. Retirement Fund
+        retirement += 1330000;
+        retirement = retirement * (1 + realReturnMonthly);
       }
-      construction = construction * (1 + realReturnMonthly);
-      if (construction > 150000000) construction = 150000000;
-
-      // 3. University Fund
-      university += 74000;
-      university = university * (1 + realReturnMonthly);
-
-      // 4. Retirement Fund
-      retirement += 1330000;
-      retirement = retirement * (1 + realReturnMonthly);
     }
 
     // Save annual values at the end of December
