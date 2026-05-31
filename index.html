@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2.0.0">
+  <link rel="stylesheet" href="style.css?v=2.1.0">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
@@ -174,9 +174,9 @@
         <div class="editor-grid" style="margin-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 1rem; margin-bottom: 1rem;">
           <div class="editor-group" style="grid-column: span 2;">
             <label for="edit-initial-balance" style="color: #60a5fa; font-weight: 600; display: flex; align-items: center; gap: 0.25rem;">💰 Saldo Inicial del Plan (Junio 2026)</label>
-            <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
-              <input type="number" id="edit-initial-balance" style="flex-grow: 1;" placeholder="Ej. 1000000">
-              <button id="btn-save-initial-balance" class="btn-sync" style="white-space: nowrap; height: 38px; border-radius: 8px;">Guardar Saldo</button>
+            <div class="initial-balance-row">
+              <input type="number" id="edit-initial-balance" placeholder="Ej. 1000000">
+              <button id="btn-save-initial-balance" class="btn-sync">Guardar Saldo</button>
             </div>
           </div>
         </div>
@@ -313,6 +313,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=2.0.0"></script>
+  <script src="app.js?v=2.1.0"></script>
 </body>
 </html>

@@ -5,13 +5,17 @@
   padding: 0;
 }
 
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   font-family: 'Outfit', sans-serif;
   background-color: #090d16;
   color: #f1f5f9;
   min-height: 100vh;
   position: relative;
-  overflow-x: hidden;
   padding-bottom: 2rem;
 }
 
@@ -89,6 +93,7 @@ body {
   padding: 1.75rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-width: 0; /* Prevents overflow of child elements (like scrollable tables) in Grid layout */
 }
 
 .card:hover {
@@ -842,5 +847,48 @@ body {
   display: flex;
   gap: 1rem;
   justify-content: center;
+}
+
+/* Initial Balance row styling */
+.initial-balance-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.initial-balance-row input {
+  flex-grow: 1;
+}
+
+.initial-balance-row button {
+  white-space: nowrap;
+  height: 38px;
+  border-radius: 8px;
+  padding: 0 1rem;
+}
+
+@media (max-width: 500px) {
+  .initial-balance-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .initial-balance-row button {
+    width: 100%;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+
+  .modal-content {
+    padding: 1.5rem 1rem;
+  }
 }
 
