@@ -375,11 +375,27 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.table-container::-webkit-scrollbar {
+  height: 6px;
+}
+.table-container::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.2);
+  border-radius: 3px;
+}
+.table-container::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.25);
+  border-radius: 3px;
+}
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.4);
+}
+
 .financial-table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
   font-size: 0.9rem;
+  min-width: 850px; /* Enforces minimum width to make it scrollable on mobile */
 }
 
 .financial-table th {
@@ -447,11 +463,103 @@ body {
 }
 
 @media (max-width: 600px) {
+  .container {
+    padding: 1rem 0.75rem;
+  }
+
+  .app-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .app-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .logo-symbol {
+    font-size: 1.8rem;
+  }
+
+  .header-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .card {
+    padding: 1.25rem 1rem;
+    border-radius: 16px;
+  }
+
+  .card h2 {
+    font-size: 1.15rem;
+    margin-bottom: 1rem;
+  }
+
   .editor-grid {
     grid-template-columns: 1fr;
   }
+
   .editor-group[style*="grid-column"] {
     grid-column: span 1 !important;
+  }
+
+  /* Sync status bar stacking */
+  .sync-status-bar {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .sync-info {
+    justify-content: center;
+  }
+
+  .sync-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .sync-actions button {
+    flex-grow: 1;
+  }
+
+  .sync-settings-panel {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .sync-settings-panel input {
+    min-width: 100%;
+  }
+}
+
+/* Hide tab scrollbar for clean layout */
+.months-tabs-container::-webkit-scrollbar {
+  display: none;
+}
+.months-tabs-container {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Mobile Task Item badge wrapping */
+@media (max-width: 500px) {
+  .task-item {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .task-text {
+    width: calc(100% - 34px); /* Subtract checkbox width and gap */
+  }
+
+  .task-meta {
+    width: 100%;
+    padding-left: 2.1rem; /* Align badge with text content */
+    display: flex;
   }
 }
 

@@ -240,8 +240,43 @@ function formatCurrency(num) {
   return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(num);
 }
 
+// Calculate the simulated balance at the end of a specific month, starting from June 2026
+function getSimulatedBalanceAtEnd(targetMonthId) {
+  let runningBalance = parseFloat(localStorage.getItem('initial_balance')) || 0;
+  const { month: targetM, year: targetY } = parseMonthId(targetMonthId);
+  
+  let currentM = 5; // June
+  let currentY = 2026;
+  
+  while (currentY < targetY || (currentY === targetY && currentM <= targetM)) {
+    const monthId = getMonthIdFromDate(currentM, currentY);
+    const data = getMonthData(monthId);
+    
+    const income = data.income;
+    const regularExpense = -data.expenseRegular;
+    const loan = -data.loan;
+    const card = -data.creditCard;
+    const vacation = -data.vacation;
+    const house = -data.houseManoObra;
+    
+    runningBalance = runningBalance + income + regularExpense + loan + card + vacation + house;
+    
+    currentM++;
+    if (currentM === 12) {
+      currentM = 0;
+      currentY++;
+    }
+  }
+  return runningBalance;
+}
+
 // Update Metas progress bars and values based on checked tasks and seeds
 function updateProgressBars() {
+  // Calculate simulated Feb 2027 ending balance for dynamic seeds
+  const feb27EndingBalance = getSimulatedBalanceAtEnd('feb-27');
+  const emergencySeed = Math.min(10000000, Math.max(0, feb27EndingBalance));
+  const constructionSeed = Math.max(0, feb27EndingBalance - emergencySeed);
+
   // 1. Vacations Fund Progress
   let totalVacationsSaved = 0;
   // We scan the tasksList keys stored in localStorage or default tasks
@@ -277,7 +312,7 @@ function updateProgressBars() {
   if (checkedTasks['jun-sac']) emergencyFundSaved += 3725000;
   if (checkedTasks['dic-sac']) emergencyFundSaved += 2325000;
   if (checkedTasks['feb-viaje']) {
-    emergencyFundSaved += 10000000; // March 2027 base allocation
+    emergencyFundSaved += emergencySeed; // Dynamic March 2027 base allocation
   }
   const emergencyPct = Math.min(100, (emergencyFundSaved / 23250000) * 100);
   document.getElementById('bar-emergency').style.width = emergencyPct + '%';
@@ -292,7 +327,7 @@ function updateProgressBars() {
   // 5. Casa Salta - Construcción Fase 2 Progress
   let constructionF2Saved = 0;
   if (checkedTasks['feb-viaje']) {
-    constructionF2Saved += 1933203; // March 2027 seed allocation
+    constructionF2Saved += constructionSeed; // Dynamic March 2027 seed allocation
   }
   // Check any checked long-term construction tasks
   rollingMonths.forEach(month => {
@@ -411,7 +446,7 @@ function renderTable() {
   tbody.innerHTML = '';
   
   // Calculate the starting balance of the rolling window by running a history simulation from June 2026
-  let runningBalance = 0;
+  let runningBalance = parseFloat(localStorage.getItem('initial_balance')) || 0;
   
   // We generate a chronological sequence from June 2026 up to the last month of our window
   const fullSeq = [];
@@ -528,8 +563,11 @@ function renderDecenalTable() {
     // In March 2027, initialize the seeds if the transition/travel task is completed or projected
     if (simYear === 2027 && simMonth === 2) {
       if (isTaskActive('feb-viaje', 1, 2027)) {
-        emergency += 10000000;
-        construction += 1933203;
+        const feb27EndingBalance = getSimulatedBalanceAtEnd('feb-27');
+        const emergencySeed = Math.min(10000000, Math.max(0, feb27EndingBalance));
+        const constructionSeed = Math.max(0, feb27EndingBalance - emergencySeed);
+        emergency += emergencySeed;
+        construction += constructionSeed;
       }
     }
 
@@ -689,9 +727,35 @@ window.onload = () => {
   populateMonthSelector();
   loadEditorValues();
   
+  // Load initial balance
+  document.getElementById('edit-initial-balance').value = localStorage.getItem('initial_balance') || 0;
+  
   // Add listeners
   document.getElementById('edit-month').addEventListener('change', loadEditorValues);
   document.getElementById('btn-save-params').addEventListener('click', saveEditorValues);
+  
+  // Add listener for initial balance save
+  document.getElementById('btn-save-initial-balance').addEventListener('click', () => {
+    const val = parseFloat(document.getElementById('edit-initial-balance').value) || 0;
+    localStorage.setItem('initial_balance', val);
+    
+    // Re-render views
+    renderTable();
+    renderTasks();
+    updateProgressBars();
+    renderDecenalTable();
+    triggerAutoSave();
+    
+    // micro-feedback
+    const btn = document.getElementById('btn-save-initial-balance');
+    const oldText = btn.textContent;
+    btn.textContent = 'Guardado ✓';
+    btn.style.background = '#10b981';
+    setTimeout(() => {
+      btn.textContent = oldText;
+      btn.style.background = '';
+    }, 1500);
+  });
   
   // Cloud Sync UI listeners
   document.getElementById('btn-sync-settings').addEventListener('click', () => {
@@ -880,6 +944,7 @@ async function searchDriveFile() {
 // Generate the JSON content of all local storage state
 function serializeLocalData() {
   const data = {
+    initialBalance: parseFloat(localStorage.getItem('initial_balance')) || 0,
     overrides: {},
     checkedTasks: checkedTasks,
     customTasks: {},
@@ -976,6 +1041,14 @@ async function downloadDriveContent() {
   
   checkedTasks = data.checkedTasks || {};
   saveState();
+  
+  if (data.initialBalance !== undefined) {
+    localStorage.setItem('initial_balance', data.initialBalance);
+    document.getElementById('edit-initial-balance').value = data.initialBalance;
+  } else {
+    localStorage.removeItem('initial_balance');
+    document.getElementById('edit-initial-balance').value = 0;
+  }
   
   // Reload App UI
   renderTabs();
