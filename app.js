@@ -103,7 +103,7 @@ function updateProgressBars() {
   document.getElementById('bar-vacations').style.width = vacationsPct + '%';
   document.getElementById('val-vacations').textContent = `${formatCurrency(totalVacationsSaved)} / $2.000.000`;
 
-  // 2. House Progress
+  // 2. House Progress (Etapa 1 Cielo Raso + Materiales)
   let totalHousePaid = 0;
   // Let's sum checked hand-on-labor and materials
   Object.keys(tasksList).forEach(month => {
@@ -113,18 +113,17 @@ function updateProgressBars() {
       }
     });
   });
-  // Total House target is 4.5M for total project
   const housePct = Math.min(100, (totalHousePaid / 4500000) * 100);
   document.getElementById('bar-salta').style.width = housePct + '%';
   document.getElementById('val-salta').textContent = `${formatCurrency(totalHousePaid)} / $4.500.000`;
 
   // 3. Emergency Fund Progress
   let emergencyFundSaved = 0;
-  // From June/Dec aguinaldos
   if (checkedTasks['jun-sac']) emergencyFundSaved += 3725000;
   if (checkedTasks['dic-sac']) emergencyFundSaved += 2325000;
-  
-  // Total Emergency Fund target is 23.25M
+  if (checkedTasks['feb-viaje']) {
+    emergencyFundSaved += 10000000; // Colchón base asignado en marzo 2027
+  }
   const emergencyPct = Math.min(100, (emergencyFundSaved / 23250000) * 100);
   document.getElementById('bar-emergency').style.width = emergencyPct + '%';
   document.getElementById('val-emergency').textContent = `${formatCurrency(emergencyFundSaved)} / $23.250.000`;
@@ -133,6 +132,21 @@ function updateProgressBars() {
   const educationPct = 0;
   document.getElementById('bar-education').style.width = educationPct + '%';
   document.getElementById('val-education').textContent = `$0 / $16.473.960`;
+
+  // 5. Casa Salta - Construcción Fase 2 Progress
+  let constructionF2Saved = 0;
+  if (checkedTasks['feb-viaje']) {
+    constructionF2Saved += 1933203; // Semilla inicial asignada en marzo 2027
+  }
+  const constF2Pct = Math.min(100, (constructionF2Saved / 150000000) * 100);
+  document.getElementById('bar-const-f2').style.width = constF2Pct + '%';
+  document.getElementById('val-const-f2').textContent = `${formatCurrency(constructionF2Saved)} / $150.000.000`;
+
+  // 6. Celebraciones & Mendoza Progress
+  let celebsSaved = 0;
+  const celebsPct = 0;
+  document.getElementById('bar-celebs').style.width = celebsPct + '%';
+  document.getElementById('val-celebs').textContent = `${formatCurrency(celebsSaved)} / $1.440.000`;
 }
 
 // Render Monthly Tabs
