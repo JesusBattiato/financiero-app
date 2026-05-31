@@ -8,8 +8,8 @@ const monthsData = [
   { id: 'sep-26', name: 'Sep. 2026', income: 8250000, expenseRegular: 4274566, loan: 3219566.60, vacation: 250000, houseManoObra: 0, houseMaterial: 167000 },
   { id: 'oct-26', name: 'Oct. 2026', income: 8250000, expenseRegular: 4274566, loan: 3219566.60, vacation: 250000, houseManoObra: 0, houseMaterial: 167000 },
   { id: 'nov-26', name: 'Nov. 2026', income: 8250000, expenseRegular: 4274566, loan: 3219566.60, vacation: 250000, houseManoObra: 0, houseMaterial: 167000 },
-  { id: 'dic-26', name: 'Dic. 2026', income: 12375000, expenseRegular: 4674566, loan: 3219566.60, vacation: 250000, houseManoObra: 2000000, houseMaterial: 167000 },
-  { id: 'ene-27', name: 'Enero 2027', income: 8250000, expenseRegular: 4274566, loan: 3219566.60, vacation: 250000, houseManoObra: 0, houseMaterial: 0 }
+  { id: 'dic-26', name: 'Dic. 2026', income: 12375000, expenseRegular: 4674566, loan: 3219566.60, vacation: 250000, houseManoObra: 0, houseMaterial: 167000 },
+  { id: 'ene-27', name: 'Enero 2027', income: 8250000, expenseRegular: 4274566, loan: 3219566.60, vacation: 250000, houseManoObra: 2000000, houseMaterial: 0 }
 ];
 
 const tasksList = {
@@ -20,7 +20,7 @@ const tasksList = {
     { id: 'jun-sac', title: 'Reservar Aguinaldo Tecpetrol', desc: 'Apartar los $3.725.000 netos sobrantes del aguinaldo para el Fondo de Emergencia.', amount: 3725000, category: 'saving' }
   ],
   'jul-26': [
-    { id: 'jul-obra', title: 'Pagar Etapa 1 Mano de Obra (Cielo Raso)', desc: 'Desembolsar $1.000.000 ARS completos a Aldo Cachi para construir el cielo raso.', amount: 1000000, category: 'house' },
+    { id: 'jul-obra', title: 'Pagar Etapa 1 Mano de Obra (Cielo Raso)', desc: 'Desembolsar $1.000.000 ARS completos (disponibles tras cobrar el aguinaldo de junio) a Aldo Cachi para construir el cielo raso.', amount: 1000000, category: 'house' },
     { id: 'jul-vac', title: 'Ahorro Vacaciones', desc: 'Separar $250.000 para el viaje de Feb 2027.', amount: 250000, category: 'vacation' },
     { id: 'jul-mat', title: 'Pago Tarjeta Cuota Materiales', desc: 'Debito de la cuota 1/6 de materiales por $167.000.', amount: 167000, category: 'house' }
   ],
@@ -41,12 +41,12 @@ const tasksList = {
     { id: 'nov-mat', title: 'Pago Tarjeta Cuota Materiales', desc: 'Debito de la cuota 5/6 de materiales por $167.000.', amount: 167000, category: 'house' }
   ],
   'dic-26': [
-    { id: 'dic-obra', title: 'Pagar Etapa 2 Mano de Obra (Sanitaria)', desc: 'Desembolsar $2.000.000 ARS completos para realizar la instalación sanitaria de la casa.', amount: 2000000, category: 'house' },
     { id: 'dic-vac', title: 'Ahorro Vacaciones', desc: 'Separar $250.000 para el viaje de Feb 2027.', amount: 250000, category: 'vacation' },
     { id: 'dic-mat', title: 'Pago Tarjeta Cuota Materiales', desc: 'Debito de la cuota 6/6 de materiales por $167.000 (Fin!).', amount: 167000, category: 'house' },
     { id: 'dic-sac', title: 'Reservar Aguinaldo Dec', desc: 'Apartar los $2.325.000 restantes del aguinaldo neto para el Fondo de Emergencia.', amount: 2325000, category: 'saving' }
   ],
   'ene-27': [
+    { id: 'ene-obra', title: 'Pagar Etapa 2 Mano de Obra (Sanitaria)', desc: 'Desembolsar $2.000.000 ARS completos (disponibles tras cobrar el aguinaldo de diciembre) para la instalación sanitaria.', amount: 2000000, category: 'house' },
     { id: 'ene-vac', title: 'Ahorro Vacaciones', desc: 'Separar los últimos $250.000 (Fondo Vacaciones completado por $2M!).', amount: 250000, category: 'vacation' },
     { id: 'ene-loan', title: 'Última Cuota Préstamo Santander', desc: 'Pagar la cuota final del préstamo 12/12. Libre de cuota de $3,22M a partir del próximo mes!', amount: 3219566, category: 'debt' }
   ]
