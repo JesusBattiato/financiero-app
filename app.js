@@ -221,6 +221,7 @@ function getTasksForMonth(monthId) {
 let rollingMonths = getRolling12Months();
 let currentMonthTab = rollingMonths[0]; // defaults to first visible month
 let checkedTasks = {};
+let simulatedFlows = {}; // Global variable to hold flows for all simulated months
 
 // Load saved checklist state
 function loadState() {
@@ -242,7 +243,7 @@ function formatCurrency(num) {
 
 // Calculate the simulated balance at the end of a specific month, starting from June 2026
 function getSimulatedBalanceAtEnd(targetMonthId) {
-  let runningBalance = parseFloat(localStorage.getItem('initial_balance')) || 0;
+  let runningBalance = 0;
   const { month: targetM, year: targetY } = parseMonthId(targetMonthId);
   
   let currentM = 5; // June
@@ -252,6 +253,13 @@ function getSimulatedBalanceAtEnd(targetMonthId) {
     const monthId = getMonthIdFromDate(currentM, currentY);
     const data = getMonthData(monthId);
     
+    let balanceStart = runningBalance;
+    if (data.initialBalance !== undefined) {
+      balanceStart = data.initialBalance;
+    } else if (monthId === 'jun-26') {
+      balanceStart = parseFloat(localStorage.getItem('initial_balance')) || 0;
+    }
+    
     const income = data.income;
     const regularExpense = -data.expenseRegular;
     const loan = -data.loan;
@@ -259,7 +267,7 @@ function getSimulatedBalanceAtEnd(targetMonthId) {
     const vacation = -data.vacation;
     const house = -data.houseManoObra;
     
-    runningBalance = runningBalance + income + regularExpense + loan + card + vacation + house;
+    runningBalance = balanceStart + income + regularExpense + loan + card + vacation + house;
     
     currentM++;
     if (currentM === 12) {
@@ -445,8 +453,7 @@ function renderTable() {
   const tbody = document.getElementById('projection-table-body');
   tbody.innerHTML = '';
   
-  // Calculate the starting balance of the rolling window by running a history simulation from June 2026
-  let runningBalance = parseFloat(localStorage.getItem('initial_balance')) || 0;
+  let runningBalance = 0;
   
   // We generate a chronological sequence from June 2026 up to the last month of our window
   const fullSeq = [];
@@ -465,10 +472,17 @@ function renderTable() {
   }
 
   // Run calculation simulation
-  const visibleMonthData = {};
+  simulatedFlows = {};
   fullSeq.forEach(monthId => {
     const data = getMonthData(monthId);
-    const balanceStart = runningBalance;
+    
+    let balanceStart = runningBalance;
+    if (data.initialBalance !== undefined) {
+      balanceStart = data.initialBalance;
+    } else if (monthId === 'jun-26') {
+      balanceStart = parseFloat(localStorage.getItem('initial_balance')) || 0;
+    }
+    
     const income = data.income;
     const regularExpense = -data.expenseRegular;
     const loan = -data.loan;
@@ -481,31 +495,31 @@ function renderTable() {
     const balanceEnd = balanceStart + income + regularExpense + loan + card + vacation + house;
     runningBalance = balanceEnd;
     
-    // If within our rolling 12 months, save details
-    if (rollingMonths.includes(monthId)) {
-      visibleMonthData[monthId] = {
-        balanceStart,
-        income,
-        regularExpense,
-        loan,
-        vacation,
-        house,
-        card,
-        balanceEnd
-      };
-    }
+    simulatedFlows[monthId] = {
+      balanceStart,
+      income,
+      regularExpense,
+      loan,
+      vacation,
+      house,
+      card,
+      balanceEnd
+    };
   });
 
   // Render rows
   rollingMonths.forEach(monthId => {
     const data = getMonthData(monthId);
-    const flow = visibleMonthData[monthId];
+    const flow = simulatedFlows[monthId];
     if (!flow) return;
 
     const tr = document.createElement('tr');
+    const isOverridden = data.initialBalance !== undefined;
+    const startBalanceStyle = isOverridden ? 'style="color: #60a5fa; font-weight: bold;" title="Saldo inicial ajustado manualmente"' : '';
+
     tr.innerHTML = `
       <td>${data.name}</td>
-      <td>${formatCurrency(flow.balanceStart)}</td>
+      <td ${startBalanceStyle}>${formatCurrency(flow.balanceStart)}</td>
       <td>${formatCurrency(flow.income)}</td>
       <td>${formatCurrency(flow.regularExpense)}</td>
       <td>${formatCurrency(flow.loan)}</td>
@@ -663,6 +677,37 @@ function loadEditorValues() {
   
   document.getElementById('edit-saving-vacation').value = data.vacation;
   document.getElementById('edit-saving-house').value = data.houseManoObra;
+
+  // Load monthly initial balance override
+  const label = document.querySelector('label[for="edit-initial-balance"]');
+  if (label) {
+    label.textContent = `💰 Saldo Inicial de ${data.name}`;
+  }
+  
+  // Load override initialBalance if exists, otherwise show simulated balanceStart
+  const overrides = localStorage.getItem(`override_${monthId}`);
+  let initialBalanceVal = null;
+  if (overrides) {
+    const parsed = JSON.parse(overrides);
+    if (parsed.initialBalance !== undefined) {
+      initialBalanceVal = parsed.initialBalance;
+    }
+  }
+  
+  const initialBalanceInput = document.getElementById('edit-initial-balance');
+  if (initialBalanceInput) {
+    if (initialBalanceVal !== null) {
+      initialBalanceInput.value = initialBalanceVal;
+      initialBalanceInput.style.color = '#60a5fa'; // Light blue to show manual override
+      initialBalanceInput.style.fontWeight = 'bold';
+    } else {
+      // Show simulated start balance
+      const flow = simulatedFlows[monthId];
+      initialBalanceInput.value = flow ? Math.round(flow.balanceStart) : 0;
+      initialBalanceInput.style.color = ''; // Default style
+      initialBalanceInput.style.fontWeight = '';
+    }
+  }
 }
 
 // Save inputs of the parameter editor to LocalStorage and reload page data
@@ -699,7 +744,11 @@ function saveEditorValues() {
     life
   };
 
-  localStorage.setItem(`override_${monthId}`, JSON.stringify(overrides));
+  const existingStr = localStorage.getItem(`override_${monthId}`);
+  const existing = existingStr ? JSON.parse(existingStr) : {};
+  const mergedOverrides = { ...existing, ...overrides };
+
+  localStorage.setItem(`override_${monthId}`, JSON.stringify(mergedOverrides));
   
   // Re-render everything to update values
   renderTable();
@@ -723,21 +772,39 @@ function saveEditorValues() {
 window.onload = () => {
   loadState();
   
-  // Populating editor controls and dropdowns
+  // Render views first to compute simulatedFlows
+  renderTabs();
+  renderTasks();
+  updateProgressBars();
+  renderTable();
+  renderDecenalTable();
+  
+  // Populating editor controls and dropdowns using simulatedFlows
   populateMonthSelector();
   loadEditorValues();
-  
-  // Load initial balance
-  document.getElementById('edit-initial-balance').value = localStorage.getItem('initial_balance') || 0;
   
   // Add listeners
   document.getElementById('edit-month').addEventListener('change', loadEditorValues);
   document.getElementById('btn-save-params').addEventListener('click', saveEditorValues);
   
-  // Add listener for initial balance save
+  // Add listener for initial balance save per selected month
   document.getElementById('btn-save-initial-balance').addEventListener('click', () => {
-    const val = parseFloat(document.getElementById('edit-initial-balance').value) || 0;
-    localStorage.setItem('initial_balance', val);
+    const monthId = document.getElementById('edit-month').value;
+    const val = parseFloat(document.getElementById('edit-initial-balance').value);
+    
+    // Get existing overrides for this month
+    const overridesStr = localStorage.getItem(`override_${monthId}`);
+    const overrides = overridesStr ? JSON.parse(overridesStr) : {};
+    
+    if (isNaN(val)) {
+      // If user clears the input, remove the override
+      delete overrides.initialBalance;
+    } else {
+      overrides.initialBalance = val;
+    }
+    
+    // Save overrides
+    localStorage.setItem(`override_${monthId}`, JSON.stringify(overrides));
     
     // Re-render views
     renderTable();
@@ -745,6 +812,9 @@ window.onload = () => {
     updateProgressBars();
     renderDecenalTable();
     triggerAutoSave();
+    
+    // Refresh editor colors/values
+    loadEditorValues();
     
     // micro-feedback
     const btn = document.getElementById('btn-save-initial-balance');

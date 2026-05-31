@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2.1.0">
+  <link rel="stylesheet" href="style.css?v=2.2.0">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
@@ -204,7 +204,7 @@
       <section class="card table-card full-width">
         <h2>Proyección Mensual de Flujo de Caja</h2>
         <div class="table-container">
-          <table class="financial-table">
+          <table id="projection-table" class="financial-table">
             <thead>
               <tr>
                 <th>Mes</th>
@@ -275,7 +275,7 @@
           <div>
             <h3 style="font-size: 1.15rem; margin-bottom: 0.75rem; color: #34d399;">Proyección de Inversiones Acumuladas</h3>
             <div class="table-container">
-              <table class="financial-table" style="font-size: 0.82rem;">
+              <table id="decenal-table" class="financial-table" style="font-size: 0.82rem;">
                 <thead>
                   <tr>
                     <th>Año</th>
@@ -313,6 +313,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=2.1.0"></script>
+  <script src="app.js?v=2.2.0"></script>
 </body>
 </html>
