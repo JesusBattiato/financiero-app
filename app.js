@@ -71,6 +71,9 @@ function getDefaultMonthData(monthId) {
   const subsRegular = 130000; // credit card subscriptions (Personal, Starlink, MELI, etc.)
   
   let expenseRegular = nanny + home + kennedy + mortgageFixed + life + nannySAC;
+  if (year === 2026 && month === 7) { // August 2026
+    expenseRegular += 500000; // Cumpleaños Nahuel (fiesta en efectivo)
+  }
 
   // 3. Loan (Santander) - Ends in Jan 2027
   let loan = 0;
@@ -83,11 +86,12 @@ function getDefaultMonthData(monthId) {
   if (year === 2026) {
     if (month === 5) creditCard = 660000; // June (already closed)
     else if (month === 6) creditCard = 475020; // July (installments + subscriptions)
-    else if (month === 7) creditCard = 612054; // August (installments + materials + subscriptions)
-    else if (month >= 8 && month <= 10) creditCard = 492767; // Sep-Nov
-    else if (month === 11) creditCard = 461117; // Dec
+    else if (month === 7) creditCard = 474721; // August (subscriptions + materials C1 of $29,667 + other)
+    else if (month === 8) creditCard = 855434; // September (includes Nahuel's gift $500k + C2 materials $29,667 + subscriptions)
+    else if (month >= 9 && month <= 10) creditCard = 355434; // Oct-Nov (C3-C4 materials $29,667 + subscriptions)
+    else if (month === 11) creditCard = 323784; // Dec (C5 materials $29,667 + subscriptions)
   } else if (year === 2027) {
-    if (month === 0) creditCard = 461117; // Jan
+    if (month === 0) creditCard = 323784; // Jan (C6 materials $29,667 + subscriptions)
     else if (month === 1 || month === 2) creditCard = 196562; // Feb-Mar (Mueblería Güemes + subscriptions)
   }
 
@@ -107,8 +111,10 @@ function getDefaultMonthData(monthId) {
 
   // 6. House Efectivo (Mano de obra y materiales en efectivo)
   let houseManoObra = 0;
-  if (year === 2026 && month === 6) {
-    houseManoObra = 1500000; // July Cielo Raso + Materials Cash
+  if (year === 2026 && month === 5) {
+    houseManoObra = 582000; // June: Electrical Materials Cash (26% discount)
+  } else if (year === 2026 && month === 6) {
+    houseManoObra = 2022000; // July: Cielo Raso labor ($1M) + Elec labor ($500k) + Wood cash ($522k)
   } else if (year === 2027 && month === 0) {
     houseManoObra = 2000000; // January Sanitaria
   } else if (year > 2027 || (year === 2027 && month >= 2)) {
@@ -159,29 +165,33 @@ function getTasksForMonth(monthId) {
     list.push({ id: 'jun-yair-extra', title: 'Transferencia Extra a Yair', desc: 'Transferencia familiar adicional de $700.000.', amount: 700000, category: 'expense' });
     list.push({ id: 'jun-visa', title: 'Pago Tarjeta Visa (Junio)', desc: 'Pago del cierre de tarjeta de mayo de $660.000.', amount: 660000, category: 'expense' });
     list.push({ id: 'jun-loan', title: 'Cuota Préstamo Santander 5/12', desc: 'Pago automático del préstamo.', amount: 3219566, category: 'debt' });
+    list.push({ id: 'jun-elec-mat', title: 'Comprar Materiales Eléctricos (Efectivo)', desc: 'Adquirir cables, cajas y accesorios en efectivo con 26% de descuento.', amount: 582000, category: 'house' });
   } else if (monthId === 'jul-26') {
-    list.push({ id: 'jul-obra', title: 'Pagar Etapa 1 Mano de Obra (Cielo Raso)', desc: 'Abonar $1.000.000 en efectivo para el cielo raso.', amount: 1000000, category: 'house' });
-    list.push({ id: 'jul-mat-ade', title: 'Adelanto de Materiales Salta', desc: 'Pagar $500.000 en efectivo para acopio de materiales.', amount: 500000, category: 'house' });
-    list.push({ id: 'jul-visa', title: 'Pago Tarjeta Visa (Julio)', desc: 'Pago de tarjeta de $475.020 (incluye $130k de suscripciones/corrientes).', amount: 475020, category: 'expense' });
+    list.push({ id: 'jul-obra', title: 'Pagar Etapa 1 Mano de Obra (Cielo Raso)', desc: 'Abonar $1.000.000 en efectivo al albañil por cielo raso.', amount: 1000000, category: 'house' });
+    list.push({ id: 'jul-elec-obra', title: 'Pagar Mano de Obra Electricista', desc: 'Abonar $500.000 en efectivo por armar la instalación eléctrica.', amount: 500000, category: 'house' });
+    list.push({ id: 'jul-wood', title: 'Comprar Madera para Cielo Raso (Efectivo)', desc: 'Adquirir la madera al contado en efectivo por $522.000.', amount: 522000, category: 'house' });
+    list.push({ id: 'jul-visa', title: 'Pago Tarjeta Visa (Julio)', desc: 'Pago de tarjeta de $475.020 (suscripciones de $130k y consumos).', amount: 475020, category: 'expense' });
     list.push({ id: 'jul-vac', title: 'Ahorro Vacaciones (Cuota 1)', desc: 'Separar $285.000 para el viaje de Feb 2027.', amount: 285000, category: 'vacation' });
     list.push({ id: 'jun-sac', title: 'Reservar Aguinaldo Jun (Fondo Emergencia)', desc: 'Apartar los $3.725.000 netos del aguinaldo.', amount: 3725000, category: 'saving' });
   } else if (monthId === 'ago-26') {
-    list.push({ id: 'ago-visa', title: 'Pago Tarjeta Visa (Agosto)', desc: 'Pago de tarjeta de $612.054 (incluye cuotas, $130k de suscripciones y cuota 1 de materiales).', amount: 612054, category: 'expense' });
-    list.push({ id: 'ago-mat', title: 'Registrar Cuota Materiales Casa 1/6', desc: 'Cuota 1/6 de materiales por $167.000. (Ya incluida en el total de la tarjeta).', amount: 167000, category: 'house' });
+    list.push({ id: 'ago-visa', title: 'Pago Tarjeta Visa (Agosto)', desc: 'Pago de tarjeta de $474.721 (incluye $130k de suscripciones y cuota 1/6 de materiales restantes).', amount: 474721, category: 'expense' });
+    list.push({ id: 'ago-mat', title: 'Registrar Cuota Materiales Casa 1/6', desc: 'Cuota 1/6 de materiales por $29.667. (Ya incluida en el total de la tarjeta).', amount: 29667, category: 'house' });
     list.push({ id: 'ago-vac', title: 'Ahorro Vacaciones (Cuota 2)', desc: 'Separar $285.000.', amount: 285000, category: 'vacation' });
+    list.push({ id: 'ago-cumple-nahuel', title: 'Pagar Cumpleaños Nahuel (Efectivo)', desc: 'Abonar $500.000 en efectivo por los gastos de la fiesta.', amount: 500000, category: 'expense' });
+    list.push({ id: 'ago-regalo-nahuel', title: 'Comprar Regalo Nahuel Autito Eléctrico', desc: 'Comprar con tarjeta el autito eléctrico de 12v por $500.000.', amount: 500000, category: 'expense' });
   } else if (monthId === 'sep-26' || monthId === 'oct-26' || monthId === 'nov-26') {
     const cuotaN = monthId === 'sep-26' ? '2/6' : monthId === 'oct-26' ? '3/6' : '4/6';
     const cardVal = data.creditCard;
-    list.push({ id: `${monthId}-visa`, title: 'Pago Tarjeta Visa', desc: `Pagar cierre mensual de tarjeta de ${formatCurrency(cardVal)}.`, amount: cardVal, category: 'expense' });
-    list.push({ id: `${monthId}-mat`, title: `Registrar Cuota Materiales Casa ${cuotaN}`, desc: `Cuota ${cuotaN} de materiales por $167.000. (Ya incluida en el total de la tarjeta).`, amount: 167000, category: 'house' });
+    list.push({ id: `${monthId}-visa`, title: 'Pago Tarjeta Visa', desc: `Pagar cierre mensual de tarjeta de ${formatCurrency(cardVal)} (incluye suscripciones, cuota de materiales y consumos).`, amount: cardVal, category: 'expense' });
+    list.push({ id: `${monthId}-mat`, title: `Registrar Cuota Materiales Casa ${cuotaN}`, desc: `Cuota ${cuotaN} de materiales por $29.667. (Ya incluida en el total de la tarjeta).`, amount: 29667, category: 'house' });
     list.push({ id: `${monthId}-vac`, title: 'Ahorro Vacaciones', desc: 'Separar $285.000.', amount: 285000, category: 'vacation' });
   } else if (monthId === 'dic-26') {
-    list.push({ id: 'dic-visa', title: 'Pago Tarjeta Visa (Diciembre)', desc: 'Pago de tarjeta de $461.117.', amount: 461117, category: 'expense' });
-    list.push({ id: 'dic-mat', title: 'Registrar Cuota Materiales Casa 5/6', desc: 'Cuota 5/6 de materiales por $167.000. (Ya incluida en el total de la tarjeta).', amount: 167000, category: 'house' });
+    list.push({ id: 'dic-visa', title: 'Pago Tarjeta Visa (Diciembre)', desc: 'Pago de tarjeta de $323.784.', amount: 323784, category: 'expense' });
+    list.push({ id: 'dic-mat', title: 'Registrar Cuota Materiales Casa 5/6', desc: 'Cuota 5/6 de materiales por $29.667. (Ya incluida en el total de la tarjeta).', amount: 29667, category: 'house' });
     list.push({ id: 'dic-vac', title: 'Ahorro Vacaciones (Cuota 6)', desc: 'Separar $285.000.', amount: 285000, category: 'vacation' });
   } else if (monthId === 'ene-27') {
-    list.push({ id: 'ene-visa', title: 'Pago Tarjeta Visa (Enero)', desc: 'Pago de tarjeta de $461.117.', amount: 461117, category: 'expense' });
-    list.push({ id: 'ene-mat', title: 'Registrar Cuota Materiales Casa 6/6', desc: 'Cuota 6/6 de materiales por $167.000. (Ya incluida en el total de la tarjeta).', amount: 167000, category: 'house' });
+    list.push({ id: 'ene-visa', title: 'Pago Tarjeta Visa (Enero)', desc: 'Pago de tarjeta de $323.784.', amount: 323784, category: 'expense' });
+    list.push({ id: 'ene-mat', title: 'Registrar Cuota Materiales Casa 6/6', desc: 'Cuota 6/6 de materiales por $29.667. (Ya incluida en el total de la tarjeta).', amount: 29667, category: 'house' });
     list.push({ id: 'ene-obra', title: 'Pagar Etapa 2 Mano de Obra (Sanitaria)', desc: 'Abonar $2.000.000 en efectivo para la instalación sanitaria.', amount: 2000000, category: 'house' });
     list.push({ id: 'ene-vac', title: 'Ahorro Vacaciones (Cuota 7)', desc: 'Separar $285.000.', amount: 285000, category: 'vacation' });
     list.push({ id: 'ene-loan', title: 'Última Cuota Préstamo Santander 12/12', desc: 'Pago final del préstamo.', amount: 3219566, category: 'debt' });
@@ -311,9 +321,9 @@ function updateProgressBars() {
       }
     });
   });
-  const housePct = Math.min(100, (totalHousePaid / 4500000) * 100);
+  const housePct = Math.min(100, (totalHousePaid / 4782000) * 100);
   document.getElementById('bar-salta').style.width = housePct + '%';
-  document.getElementById('val-salta').textContent = `${formatCurrency(totalHousePaid)} / $4.500.000`;
+  document.getElementById('val-salta').textContent = `${formatCurrency(totalHousePaid)} / $4.782.000`;
 
   // 3. Emergency Fund Progress
   let emergencyFundSaved = 0;
